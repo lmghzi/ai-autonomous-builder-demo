@@ -1,6 +1,19 @@
-name: AI Autonomous Builder
+name: AI Autonomous Builder Engine
+
 on:
   workflow_dispatch:
+    inputs:
+      task:
+        description: 'Autonomous Task Description'
+        required: false
+        default: 'Autonomous feature iteration'
+      mode:
+        description: 'Execution Strategy'
+        required: false
+        default: 'continuous'
+
+permissions:
+  contents: write
 
 jobs:
   autonomous-cycle:
@@ -8,5 +21,16 @@ jobs:
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
-      - name: Test Runner
-        run: echo "AI Autonomous Builder verified!"
+      - name: Configure Git Identity
+        run: |
+          git config --global user.name "${{ github.actor }}"
+          git config --global user.email "${{ github.actor }}@users.noreply.github.com"
+      - name: Execute Autonomous Agent
+        run: |
+          mkdir -p .ai/logs
+          echo "{\"timestamp\":\"$(date -u)\",\"actor\":\"${{ github.actor }}\",\"task\":\"${{ inputs.task }}\",\"mode\":\"${{ inputs.mode }}\"}" > .ai/logs/pulse-latest.json
+          git add .ai/
+          if ! git diff-index --quiet HEAD --; then
+            git commit -m "feat(ai-agent): autonomous evolution [skip ci]"
+            git push origin main
+          fi
